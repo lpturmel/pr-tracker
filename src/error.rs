@@ -23,8 +23,19 @@ pub enum Error {
 
     #[error("Invalid authentication token")]
     InvalidToken,
+
+    #[error("Date parse error: {0}")]
+    DateParse(chrono::ParseError),
+
+    #[error("Not signed-in, run `pr-tracker login` to login")]
+    Unauthorized,
 }
 
+impl From<chrono::ParseError> for Error {
+    fn from(err: chrono::ParseError) -> Self {
+        Error::DateParse(err)
+    }
+}
 impl From<reqwest::Error> for Error {
     fn from(err: reqwest::Error) -> Self {
         Error::Http(err)

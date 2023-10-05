@@ -1,4 +1,5 @@
 use crate::provider::Provider;
+use base64::{engine::general_purpose, Engine as _};
 use ring::aead::{Aad, LessSafeKey, Nonce, UnboundKey, AES_256_GCM};
 use ring::rand::{SecureRandom, SystemRandom};
 use serde::{Deserialize, Serialize};
@@ -11,12 +12,21 @@ const NONCE_LEN: usize = 12;
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct AppConfig {
     pub provider: Option<Provider>,
-    pub e_token: Option<String>,
+    pub token: Option<String>,
+    pub email: Option<String>,
 }
 
-pub struct Token;
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Token(String);
 
 impl Token {
+    pub fn encode(input: &[u8]) -> String {
+        general_purpose::STANDARD.encode(input)
+    }
+    pub fn decode(encoded: &str) -> Result<Vec<u8>, crate::error::Error> {
+        let decoded = general_purpose::STANDARD.decode(encoded.as_bytes())?;
+        Ok(decoded)
+    }
     fn derive_from_passwd(password: &[u8], salt: &[u8; SALT_LEN]) -> [u8; CREDENTIAL_LEN] {
         let mut key = [0u8; CREDENTIAL_LEN];
         pbkdf2::pbkdf2_hmac::<sha2::Sha256>(password, salt, N_ITER, &mut key);
@@ -69,6 +79,21 @@ impl Token {
 
         let decrypted_data = String::from_utf8(in_out)?;
         Ok(decrypted_data)
+    }
+}
+
+#[derive(Debug)]
+pub struct SystemUser {
+    pub user: String,
+}
+
+impl SystemUser {
+    pub fn from_env() -> Self {
+        #[cfg(target_os = "windows")]
+        let user = std::env::var("USERNAME").unwrap_or_else(|_| String::from("unknown"));
+        #[cfg(not(target_os = "windows"))]
+        let user = std::env::var("USER").unwrap_or_else(|_| String::from("unknown"));
+        Self { user }
     }
 }
 

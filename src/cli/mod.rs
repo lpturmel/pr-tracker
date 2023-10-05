@@ -3,6 +3,7 @@ use clap::{Parser, Subcommand};
 pub mod account;
 pub mod login;
 pub mod logout;
+pub mod pr;
 
 /// Pull Request tracker
 #[derive(Parser, Debug)]
@@ -20,4 +21,6 @@ pub enum Commands {
     Logout(logout::Logout),
     /// Get information about the currently logged in account
     Account(account::Account),
+    /// Get pull requests
+    Pr(pr::Pr),
 }
