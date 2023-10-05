@@ -5,8 +5,8 @@ use clap::Args;
 pub struct Login {
     /// The personal access token to use
     #[arg(long, short)]
-    token: String,
+    pub token: String,
 
     #[arg(long, short, value_enum)]
-    provider: Provider,
+    pub provider: Provider,
 }
