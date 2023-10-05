@@ -7,17 +7,4 @@ The initial idea is for me to open my dev environment (currently just kitty with
 
 ## Example
 
-```
---- PR TRACKER ---
-
-project-a:
-    pr-title1
-    pr-title2
-
-project-b:
-    pr-title1
-    pr-title2
-
-
-$ _
-```
+![Example picture](/example.jpeg)
