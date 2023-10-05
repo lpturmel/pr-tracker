@@ -1,5 +1,5 @@
 use crate::provider::Provider;
-use ring::aead::{Aad, LessSafeKey, Nonce, SealingKey, UnboundKey, AES_256_GCM};
+use ring::aead::{Aad, LessSafeKey, Nonce, UnboundKey, AES_256_GCM};
 use ring::rand::{SecureRandom, SystemRandom};
 use serde::{Deserialize, Serialize};
 
@@ -14,7 +14,6 @@ pub struct AppConfig {
     pub e_token: Option<String>,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
 pub struct Token;
 
 impl Token {
