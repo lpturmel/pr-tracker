@@ -49,13 +49,15 @@ impl Command for Azdo {
                 pr.pull_request_id,
                 style(&url).underlined()
             );
-            let description = pr.description.chars().take(60).collect::<String>();
-            let description = format!(
-                "{}{}",
-                description,
-                if description.len() > 20 { "..." } else { "" }
-            );
-            println!("{}", style(description).dim());
+            if let Some(description) = &pr.description {
+                let description = description.chars().take(60).collect::<String>();
+                let description = format!(
+                    "{}{}",
+                    description,
+                    if description.len() > 20 { "..." } else { "" }
+                );
+                println!("{}", style(description).dim());
+            }
             if assigned_to_you {
                 println!("{}", style("Assigned to you").black().on_green());
             }

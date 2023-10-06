@@ -92,7 +92,7 @@ pub struct PrItem {
     pub creation_date: String,
     pub status: String,
     pub title: String,
-    pub description: String,
+    pub description: Option<String>,
     pub reviewers: Vec<Reviewer>,
     pub repository: Repository,
     pub pull_request_id: u32,
