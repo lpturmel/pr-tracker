@@ -1,6 +1,8 @@
 use std::string::FromUtf8Error;
 use thiserror::Error;
 
+use crate::azdo::DevOpsError;
+
 #[derive(Debug, Error)]
 pub enum Error {
     #[error("Config error: {0}")]
@@ -29,8 +31,16 @@ pub enum Error {
 
     #[error("Not signed-in, run `pr-tracker login` to login")]
     Unauthorized,
+
+    #[error("Azure DevOps error: {0}")]
+    DevOps(DevOpsError),
 }
 
+impl From<DevOpsError> for Error {
+    fn from(err: DevOpsError) -> Self {
+        Error::DevOps(err)
+    }
+}
 impl From<chrono::ParseError> for Error {
     fn from(err: chrono::ParseError) -> Self {
         Error::DateParse(err)

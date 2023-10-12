@@ -1,5 +1,33 @@
+use std::str::FromStr;
+
 use base64::{engine::general_purpose, Engine as _};
+use reqwest::StatusCode;
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+pub enum DevOpsError {
+    #[error("Invalid repository name")]
+    InvalidRepo,
+
+    #[error("Invalid Project ID")]
+    InvalidProject,
+
+    #[error("Invalid Organization ID")]
+    InvalidOrg,
+}
+
+impl FromStr for DevOpsError {
+    type Err = DevOpsError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "GitRepositoryNotFoundException" => Ok(DevOpsError::InvalidRepo),
+            "ProjectDoesNotExistWithNameException" => Ok(DevOpsError::InvalidProject),
+            _ => Ok(DevOpsError::InvalidOrg),
+        }
+    }
+}
 
 #[derive(Debug)]
 pub struct Client {
@@ -27,7 +55,7 @@ impl Client {
         org: &str,
         project: &str,
         repo: &str,
-    ) -> Result<AzdoResponse<PrItem>, reqwest::Error> {
+    ) -> Result<AzdoResponse<PrItem>, crate::error::Error> {
         let resp = self
             .inner
             .get(&format!(
@@ -36,8 +64,24 @@ impl Client {
             ))
             .send()
             .await?;
-        let resp = resp.json::<AzdoResponse<PrItem>>().await?;
-        Ok(resp)
+
+        match resp.status() {
+            StatusCode::UNAUTHORIZED => Err(crate::error::Error::Unauthorized),
+            StatusCode::NOT_FOUND => {
+                let err = resp.json::<AzdoError>().await?;
+                Err(crate::error::Error::DevOps(
+                    err.type_key.parse::<DevOpsError>()?,
+                ))
+            }
+            StatusCode::OK => {
+                let resp = resp.json::<AzdoResponse<PrItem>>().await?;
+                Ok(resp)
+            }
+            _ => {
+                println!("{:?}", resp);
+                Err(crate::error::Error::Unauthorized)
+            }
+        }
     }
 
     pub async fn get_profile(&self) -> Result<ConnectionData, reqwest::Error> {
@@ -120,4 +164,13 @@ pub struct Repository {
 pub struct Project {
     pub id: String,
     pub name: String,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
+pub struct AzdoError {
+    message: String,
+    type_name: String,
+    type_key: String,
+    error_code: u32,
 }

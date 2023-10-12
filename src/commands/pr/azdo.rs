@@ -22,9 +22,14 @@ impl Command for Azdo {
             .collect::<Vec<_>>();
         let prs = futures::future::join_all(prs).await;
 
+        // propagate the error for any of the futures
+        let prs = prs
+            .into_iter()
+            .collect::<Result<Vec<_>, _>>()
+            .map_err(crate::error::Error::from)?;
         let prs = prs
             .iter()
-            .flat_map(|pr| pr.as_ref().unwrap().value.iter())
+            .flat_map(|pr| pr.value.iter())
             .collect::<Vec<_>>();
 
         for (i, pr) in prs.iter().enumerate() {
