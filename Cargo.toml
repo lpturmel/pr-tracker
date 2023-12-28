@@ -7,7 +7,6 @@ edition = "2021"
 
 [dependencies]
 aes = "0.8.3"
-async-trait = "0.1.73"
 base64 = "0.21.4"
 block-modes = "0.9.1"
 chrono = "0.4.31"

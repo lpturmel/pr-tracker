@@ -1,10 +1,8 @@
 use crate::cli::pr::Azdo;
 use crate::commands::Command;
 use crate::config::SystemUser;
-use async_trait::async_trait;
 use console::style;
 
-#[async_trait]
 impl Command for Azdo {
     async fn execute(&self, cfg: crate::config::AppConfig) -> Result<(), crate::error::Error> {
         let token = cfg.token.ok_or(crate::error::Error::Unauthorized)?;

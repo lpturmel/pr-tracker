@@ -3,9 +3,7 @@ use crate::cli::login::Login;
 use crate::config::{AppConfig, SystemUser};
 use crate::emoji::SPARKLES;
 use crate::provider::Provider;
-use async_trait::async_trait;
 
-#[async_trait]
 impl Command for Login {
     async fn execute(&self, cfg: crate::config::AppConfig) -> Result<(), crate::error::Error> {
         let (display_name, email) = match self.provider {
